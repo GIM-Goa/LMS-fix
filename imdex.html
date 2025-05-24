@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fix What’s Gone Wong! – Lead‑Management Microsim</title>
+  <style>
+    :root{--primary:#005bbb;--secondary:#ffc107;}
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:Arial,Helvetica,sans-serif;background:#f5f7fb;color:#333;display:flex;justify-content:center;align-items:center;min-height:100dvh;}
+    #gameCard{background:#fff;border-radius:12px;box-shadow:0 4px 18px rgba(0,0,0,.1);width:95%;max-width:640px;overflow:hidden;display:flex;flex-direction:column;}
+    header{background:var(--primary);color:#fff;padding:1.2rem;text-align:center;}
+    header h1{font-size:1.35rem;line-height:1.25;}
+    #content{flex:1;padding:1.4rem 1.6rem;display:flex;flex-direction:column;gap:1rem;}
+    img.stage-img{width:100%;border-radius:8px;height:210px;object-fit:cover;}
+    h2{font-size:1rem;font-weight:700;}
+    .options{display:flex;flex-direction:column;gap:.75rem;}
+    button.option{padding:.8rem 1rem;border:2px solid var(--primary);border-radius:8px;background:#fff;font-weight:600;cursor:pointer;transition:.25s;}
+    button.option:hover:not(:disabled){background:var(--primary);color:#fff;}
+    button.option:disabled{opacity:.6;cursor:not-allowed;}
+    #nextBtn{align-self:flex-end;margin-top:.75rem;padding:.7rem 1.2rem;border:none;border-radius:6px;background:var(--secondary);font-weight:700;cursor:pointer;transition:.25s;}
+    #nextBtn[disabled]{opacity:.5;cursor:not-allowed;}
+    #scoreWrap{display:flex;justify-content:space-between;align-items:center;font-size:.85rem;font-weight:600;}
+    #progressBar{flex:1;height:8px;background:#e5e7eb;border-radius:4px;margin-left:.6rem;overflow:hidden;}
+    #progressFill{height:100%;width:0;background:var(--primary);transition:width .4s cubic-bezier(.4,0,.2,1);}
+    footer{background:#f1f3f9;text-align:center;font-size:.75rem;padding:.5rem 1rem;color:#555;}
+  </style>
+</head>
+<body>
+  <div id="gameCard">
+    <header><h1>Fix What’s Gone Wong!</h1></header>
+    <div id="content"></div>
+    <footer>Curator: Dr. Pravat, GIM. Free for students. Teachers may reach out for a TN</footer>
+  </div>
+<script>
+const stages=[
+  {img:'https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=60',alt:'Team huddled over analytics dashboard',q:'Your brand‑new Lead‑Management System shows a drop in conversions. Where do you start?',opts:[
+      'Audit the lead‑capture forms & sources','Fire your agency immediately','Ignore the data—sales will bounce back'],correct:0},
+  {img:'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=800&q=60',alt:'Marketer mapping customer journey',q:'Audit reveals most leads lack phone numbers. Your move?',opts:[
+      'Add progressive profiling & phone‑validation','Delete form fields to reduce friction','Blame the web team for bad UX'],correct:0},
+  {img:'https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=60',alt:'Sales & marketing alignment meeting',q:'Sales complains about lead quality. What next?',opts:[
+      'Define & share a lead‑scoring rubric jointly','Force‑push every lead to the CRM','Offer incentives for calling more leads'],correct:0},
+  {img:'https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?auto=format&fit=crop&w=800&q=60',alt:'Analytics dashboard on laptop',q:'Lead‑scoring live! How do you refine it?',opts:[
+      'Run A/B tests & monitor conversion lift','Set score to 100 for every webinar attendee','Disable scoring until quarter end'],correct:0},
+  {img:'https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=60',alt:'Customer success representative on headset',q:'Closed‑won leads churn early. What do you fix?',opts:[
+      'Map onboarding journey & trigger nurturing flows','Reduce price to lock them in','Send generic welcome email once'],correct:0}
+];
+let current=-1,score=0;
+const content=document.getElementById('content');
+function shuffle(arr){return arr.map(v=>[Math.random(),v]).sort((a,b)=>a[0]-b[0]).map(v=>v[1]);}
+function start(){content.innerHTML=`<img class="stage-img" src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=60" alt="Hero welcome" />\n<h2>Lead‑Management Challenge</h2>\n<p style="font-size:.9rem;line-height:1.45">Six months after rollout, your shiny LMS is under fire. Fix the process in five quick decisions and restore conversion glory! Click <strong>Start</strong> when ready.</p>\n<button id="nextBtn">Start</button>`;
+  document.getElementById('nextBtn').addEventListener('click',nextStage);
+}
+function nextStage(){current++;if(current>=stages.length){return endGame();}renderStage();}
+function renderStage(){const st=stages[current];const randOpts=shuffle(st.opts.map((o,i)=>({txt:o,idx:i})));const optsHtml=randOpts.map(o=>`<button class="option" data-idx="${o.idx}">${o.txt}</button>`).join('');const prog=(current)/stages.length*100;content.innerHTML=`<div id="scoreWrap">Score: ${score}<div id="progressBar"><div id="progressFill" style="width:${prog}%"></div></div></div>\n<img class="stage-img" src="${st.img}" alt="${st.alt}" />\n<h2>${st.q}</h2>\n<div class="options">${optsHtml}</div>\n<button id="nextBtn" disabled>Next</button>`;
+  document.querySelectorAll('button.option').forEach(btn=>btn.addEventListener('click',selectOption));
+  document.getElementById('nextBtn').addEventListener('click',nextStage);
+}
+function selectOption(e){const chosen=+e.target.dataset.idx;const st=stages[current];const isCorrect=chosen===st.correct;score+=isCorrect?10:-5;e.target.style.background=isCorrect?'#28a745':'#dc3545';e.target.style.color='#fff';document.querySelectorAll('button.option').forEach(b=>b.disabled=true);
+  document.getElementById('nextBtn').disabled=false;}
+function endGame(){const rating=score>=40?'Legend! 💯':score>=20?'Getting there 👍':'Needs work 😬';content.innerHTML=`<h2>All done!</h2><p style="font-size:1rem">Your final score: <strong>${score}</strong></p><p>${rating}</p><button id="nextBtn">Play again</button>`;document.getElementById('nextBtn').addEventListener('click',restart);} 
+function restart(){current=-1;score=0;nextStage();}
+start();
+</script>
+</body>
+</html>
